@@ -39,4 +39,4 @@ jobs:
       - name: Stop and remove all containers
         run: |
           docker stop $(docker ps -q)
-          docker rm $(docker ps-q)
+          docker rm $(docker ps -q)
