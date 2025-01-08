@@ -28,7 +28,7 @@ jobs:
           pip install pylint flask autopep8
       
       - name: Run autopep8
-        run: autopep8 --in-place --aggressive --aggressive .
+        run: autopep8 --in-place --aggressive --aggressive app.py
 
       - name: Analysing the code with pylint
         run: pylint $(git ls-files '*.py')

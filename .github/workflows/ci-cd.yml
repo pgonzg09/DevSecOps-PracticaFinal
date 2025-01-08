@@ -36,7 +36,5 @@ jobs:
       - name: Test the app
         run: curl -f http://localhost:5000
       
-      - name: Stop and remove all containers
-        run: |
-          docker stop $(docker ps -q)
-          docker rm $(docker ps -q)
+      - name: Stop all containers
+        run: docker stop $(docker ps -q)
