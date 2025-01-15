@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Práctica final DevSecOps: DevSecOps-PracticaFinal</title>
+<title>Práctica final DevSecOps: Práctica Final DevSecOps</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -84,16 +84,100 @@ $(function(){ initResizable(false); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">DevSecOps-PracticaFinal </div></div>
+  <div class="headertitle"><div class="title">Práctica Final DevSecOps </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md_README"></a></p>
+<p>Este repositorio contiene diferentes Workflows vistos a lo largo de la asignatura DevSecOps, además de los diferentes badges obtenidos.</p>
+<h1><a class="anchor" id="autotoc_md1"></a>
+CI/CD Pipeline</h1>
 <p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/ci-cd.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD Pipeline" style="pointer-events: none;" class="inline"/></a></p>
-<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/codacy.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/codacy.yml/badge.svg" alt="Codacy" style="pointer-events: none;" class="inline"/></a></p>
-<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/doxygen.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/doxygen.yml/badge.svg" alt="Doxygen" style="pointer-events: none;" class="inline"/></a></p>
+<p>Este workflow de CI/CD es el encargado de realizar las pruebas de integración y despliegue continuos, en este caso cada vez que se realiza un <code>push</code> a la rama <code>main</code> del repositorio. El código de este workflow se encuentra en el archivo <a href=".github/workflows/ci-cd.yml">ci-cd.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Checkout code: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Set up Docker: utiliza <a href="https://github.com/docker/setup-buildx-action">docker/setup-buildx-action@v3</a> para crear e iniciar un compilador que pueda utilizarse el los siguientes pasos del workflow.</li>
+<li>Build Docker image: compila el código utilizando el Dockerfile del repositorio (<code>docker build -t flask-app .</code>).</li>
+<li>Run Docker container: ejecuta el contenedor en el puerto <code>5000</code> en segundo plano (<code>docker run -d -p 5000:5000 flask-app</code>).</li>
+<li>Verify Docker running containers: comprueba los contenedores activos (<code>docker ps</code>).</li>
+<li>Wait util service is available: espera a que el servicio esté disponible para probar posteriormente si es accesible. <div class="fragment"><div class="line">for i in {1..10}; do</div>
+<div class="line">    curl -f http://localhost:5000 &amp;&amp; break</div>
+<div class="line">    echo &quot;Waiting for the service...&quot;</div>
+<div class="line">    sleep 5</div>
+<div class="line">done</div>
+</div><!-- fragment --></li>
+<li>Test the app: realiza una prueba de acceso simple mediante una petición HTTP a la app (<code>curl -f <a href="http://localhost:5000">http://localhost:5000</a></code>).</li>
+<li>Stop all containers: termina la ejecución de todos los contenedores activos (<code>docker stop $(docker ps -q)</code>).</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md2"></a>
+Pylint</h1>
 <p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/pylint.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/pylint.yml/badge.svg" alt="Pylint" style="pointer-events: none;" class="inline"/></a></p>
-<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/flake8.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/flake8.yml/badge.svg" alt="Flake8" style="pointer-events: none;" class="inline"/></a> </p>
-</div></div><!-- PageDoc -->
+<p>Este workflow realiza un análisis del código Python del repositorio utilizando la herramienta Pylint, que permite analizar el código sin la necesidad de ejecutarlo cada vez que se realiza un <code>push</code> a la rama <code>main</code> del repositorio. Pylint comprueba la existencia de errores, aplica un estándar al código, busca trazas en el código que indiquen posibles problemas, que sin ser bugs/errores, pueden ser errores de diseño y/o desarrollo que eventualmente deriven en poca calidad del código u otros problemas técnicos, y hace sugerencias para la refactorización del código. El código de este workflow se encuentra en el archivo <a href=".github/workflows/pylint.yml">pylint.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Checkout code: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Set up Python: utiliza <a href="https://github.com/actions/setup-python">actions/setup-python@v5</a> para establecer el entorno de Python (versión <code>3.9</code> en este caso) para poder instalar posteriormente las herramientas necesarias para analizar el código.</li>
+<li>Install dependecies: instala las dependencias para realizar el análisis: pytlint, flask y autopep8.</li>
+<li>Run autopep8: realiza un formateo automático para que el código este conforme con la guia de estilo PEP8.</li>
+<li>Analysing the code with pylint: analiza todos los archivos Python del repositorio utilizando la herramienta Pylint.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md3"></a>
+Doxygen</h1>
+<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/doxygen.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/doxygen.yml/badge.svg" alt="Doxygen" style="pointer-events: none;" class="inline"/></a></p>
+<p>Este workflow genera la documentación del proyecto de forma automática utilizando la herramienta <code>Doxygen</code>, la guarda en la carpeta [docs](docs) y la despliega en la rama <code>gh-pages</code> para su visualización en Github Pages cada vez que se realiza un <code>push</code> a la rama <code>main</code> del repositorio. El código de este workflow se encuentra en el archivo <a href=".github/workflows/doxygen.yml">doxygen.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Checkout code: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Generate Doxygen: genera la documentación utilizando <a href="https://github.com/mattnotmitt/doxygen-action">mattnotmitt/doxygen-action@edge</a> partiendo del archivo de configuración <a href=".github/Doxyfile">Doxyfile</a>. Se han configurado los siguientes parámetros dentro del archivo de configuración:<ul>
+<li>PROJECT_NAME: especifica el nombre del proyecto. -&gt; <code>"Práctica final DevSecOps"</code></li>
+<li>INPUT: especifica las carpetas y archivos a partir de los cuales se genera la documentación. -&gt; <code>README.md \ DevSecOps-PracticaFinal</code></li>
+<li>FILE_PATTERNS: especifica los patrones de archivo para generar la documentación. -&gt; <code>*.md \ *.c \ *.cpp \ *.hpp \ *.py</code></li>
+<li>OUTPUT_DIRECTORY: especifica la carpeta donde se guardará la documentación generada. -&gt; <code>docs/</code></li>
+<li>GENERATE_HTML: habilita/deshabilita la generación de HTML. -&gt; <code>YES</code></li>
+<li>GENERATE_LATEX: habilita/deshabilita la generación de Latex. -&gt; <code>NO</code></li>
+</ul>
+</li>
+<li>Deploy Doxygen page: despliega la documentación generada con Doxygen en <code>gh-pages</code> utilizando <a href="https://github.com/peaceiris/actions-gh-pages">peaceiris/actions-gh-pages@v4</a>.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md4"></a>
+Flake8</h1>
+<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/flake8.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/flake8.yml/badge.svg" alt="Flake8" style="pointer-events: none;" class="inline"/></a></p>
+<p>Este workflow realiza un análisis estático del código Python del repositorio utilizando la herramienta <code>flake8</code>, que a su vez agrupa <code>pycodestyle</code>, <code>pyflakes</code>, <code>mccabe</code> y otra serie de plugins de terceros para comprobar el estilo y calidad del código Python, cada vez que se realiza un <code>push</code> a la rama <code>main</code> del repositorio. El código de este workflow se encuentra en el archivo <a href=".github/workflows/flake8.yml">flake8.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Check out source repository: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Set up Python: utiliza <a href="https://github.com/actions/setup-python">actions/setup-python@v5</a> para establecer el entorno de Python (versión <code>3.9</code> en este caso) para poder utilizar posteriormente la herramienta <code>flake8</code>.</li>
+<li>Flake8 Lint: utiliza <a href="https://github.com/py-actions/flake8">py-actions/flake8@v2</a> para realizar el análisis del código. A su vez, este workflow instala el paquete de Python <code>flake8</code> y ejecuta el linting lógico y de estilo.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md5"></a>
+Codacy</h1>
+<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/codacy.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/codacy.yml/badge.svg" alt="Codacy" style="pointer-events: none;" class="inline"/></a></p>
+<p>Este workflow realiza un análisis estático del código de Python del repositorio y subir los datos del análisis para su visualización en <code>Security/Code scanning</code> cada vez que se realiza un <code>push</code> o un <code>pull-request</code> a la rama <code>main</code> del repositorio. El código de este workflow se encuentra en el archivo <a href=".github/workflows/codacy.yml">codacy.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Checkout code: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Run Codacy Analysis CLI: utiliza <a href="https://github.com/codacy/codacy-analysis-cli-action">codacy/codacy-analysis-cli-action@master</a> para ejecutar el análisis estático del código del repositorio.</li>
+<li>Upload SARIF results file: utiliza <a href="https://github.com/github/codeql-action/blob/main/upload-sarif/action.yml">github/codeql-action/upload-sarif@v3</a> para subir los resultados (formato SARIF) del análisis al repositorio de GitHub.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md6"></a>
+Test (with Pytest)</h1>
+<p><a href="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/test.yml"><img src="https://github.com/pgonzg09/DevSecOps-PracticaFinal/actions/workflows/test.yml/badge.svg" alt="Test" style="pointer-events: none;" class="inline"/></a></p>
+<p>Este workflow realiza varios test unitarios a la app utilizando Pytestada vez que se realiza un <code>push</code> a la rama <code>main</code> del repositorio. El código de este workflow se encuentra en el archivo <a href=".github/workflows/test.yml">test.yml</a> y consta de los siguientes pasos:</p>
+<ol type="1">
+<li>Checkout code: utiliza <a href="https://github.com/actions/checkout">actions/checkout@v4</a> para comprobar el código fuente del repositorio para que el workflow pueda acceder a él.</li>
+<li>Set up Python: utiliza <a href="https://github.com/actions/setup-python">actions/setup-python@v5</a> para establecer el entorno de Python (versión <code>3.9</code> en este caso) para poder utilizar posteriormente la herramienta <code>pytest</code>.</li>
+<li>Install dependencies: instala las dependencias para realizar el análisis: flask y pytest.</li>
+<li>Run test: lanza los test ubicados en el archivo <code>test.py</code> y los lanza utilizando <code>pytest</code>.</li>
+</ol>
+<h1><a class="anchor" id="autotoc_md7"></a>
+Act</h1>
+<p>Act es una herramienta que permite ejecutar GitHub Actions de forma local que proporciona ciertas ventajas:</p>
+<ul>
+<li><b>Retroalimentación rápida</b>: se puede utilizar act para ejecutar las acciones en el entorno local. Las variables de entorno y el sistema de archivos se configuran de manera que emulan el entorno proporcionado por GitHub.</li>
+<li><b>Ejecución local de tareas</b>: act permite aprovechar las GitHub Actions definidas en los archivos <code>.github/workflows/</code> como reemplazo del Makefile, facilitando la gestión y automatización de tareas.</li>
+</ul>
+<p>Para instalar act en nuestra máquina (requiere <code>Go toolchain 1.18+</code>):</p>
+<div class="fragment"><div class="line">git clone https://github.com/nektos/act.git</div>
+<div class="line">cd act/</div>
+<div class="line">make build</div>
+</div><!-- fragment --><p>Para utilizar act en nuestra máquina bastará con utilizar el siguiente comando:</p>
+<div class="fragment"><div class="line">act</div>
+</div><!-- fragment --> </div></div><!-- PageDoc -->
 <a href="doxygen_crawl.html"></a>
 </div><!-- contents -->
 <!-- start footer part -->

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['devsecops_20practicafinal_0',['DevSecOps-PracticaFinal',['../index.html',1,'']]]
+  ['devsecops_0',['Práctica Final DevSecOps',['../index.html',1,'']]]
 ];
